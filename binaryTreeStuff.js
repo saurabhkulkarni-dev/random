@@ -141,6 +141,44 @@ class Tree {
 
         return lValue <= node.value && node.value <= rValue; 
     }
+
+    getCommonAncestor(val1, val2) {
+        let node1 = this.getNode(val1);
+        let node2 = this.getNode(val2);
+        if(!node1 || !node2) {
+            console.log('Node does not exist!');
+            return null;
+        }
+        let parentNode = this.root;
+        let iteratorNode = parentNode;
+        while(iteratorNode !== null) {
+            if(this._contains(iteratorNode.left, val1) && this._contains(iteratorNode.left, val2)){
+                iteratorNode = iteratorNode.left;
+                parentNode = iteratorNode;
+            }else if(this._contains(iteratorNode.right, val1) && this._contains(iteratorNode.right, val2)){
+                iteratorNode = iteratorNode.right;
+                parentNode = iteratorNode;
+            }else {
+                iteratorNode = null;
+            }    
+        }
+        return parentNode.value;
+    }
+
+    _contains(node, value) {
+        if(node.value === value) {
+            return true;
+        }
+        let lContains = false;
+        let rContains = false;
+        if(node.left) {
+            lContains = this._contains(node.left, value);
+        } 
+        if(node.right) {
+            rContains = this._contains(node.right, value);
+        }
+        return lContains || rContains; 
+    }
     
 }
 
@@ -157,6 +195,7 @@ while(true) {
     console.log('4. Get depth wise lists')
     console.log('5. Check if the tree is balanced')
     console.log('6. Check if the tree is BST')
+    console.log('7. Get the most common ancestor')
 
     let choice = prompt('Enter your choice: ');
     let nextPrompt = '';
@@ -203,6 +242,22 @@ while(true) {
                 } else {
                     console.log('BST status: ')
                     console.log(testTree.checkIfBST());
+                }
+                break;
+        case 7: if(!testTree) {
+                    console.log('Tree does not exist!');
+                } else {
+                    nextPrompt = prompt('Enter node values, comma separated: ');
+                    params = nextPrompt.split(',');
+                    if(params.length !== 2) {
+                        console.log('Please input two params!');
+                        break;
+                    }
+                    if(Number(params[0]) == Number(params[1])){
+                        console.log('Please enter different values!');
+                        break;
+                    }
+                    console.log(testTree.getCommonAncestor(Number(params[0]), Number(params[1])));
                 }
                 break;
         default:console.log('Here is your tree for reference: ');
