@@ -33,5 +33,6 @@ func main() {
 	}
 
 	wg.Wait();
+	tokenizer.StopTokenizer();
 	fmt.Println("Done!");
 }
