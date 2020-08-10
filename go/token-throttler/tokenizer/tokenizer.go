@@ -13,7 +13,7 @@ type Tokenizer struct {
 	availableTokens int
 	totalTokens int
 	currentUsers map[string]bool
-	lock sync.Mutex
+	lock sync.RWMutex
 	signal chan bool
 }
 
@@ -26,7 +26,7 @@ func NewTokenizer() *Tokenizer {
 		signal: make(chan bool),
 	}
 	go tokenizer.refreshTokens();
-	return & tokenizer;
+	return &tokenizer;
 };
 
 //refresh tokens adds 2 more tokens to available tokens every five seconds
