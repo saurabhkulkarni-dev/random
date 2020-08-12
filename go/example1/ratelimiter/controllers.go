@@ -2,6 +2,7 @@ package ratelimiter
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -35,10 +36,9 @@ func (conn *Connection) SlideWindow(window time.Duration) {
 	for {
         select {
 		case <- conn.signal:
-			fmt.Println("End signal received");
+			fmt.Println("**************** End signal received ****************");
             return;
 		case <- ticker.C:
-			fmt.Println("Tick")
 			conn.updateRequests(int64(window));
         }
     }
@@ -48,20 +48,24 @@ func (conn * Connection) updateRequests(window int64) {
 	timeNow := time.Now().Unix();
 	conn.lock.Lock();
 	defer conn.lock.Unlock();
-	i := 0;
-	deletedRequests := 0;
-	for(timeNow - conn.currentTimestamps[i] >= window) {
-		deletedRequests += conn.requests[conn.currentTimestamps[i]];
-		delete(conn.requests, conn.currentTimestamps[i]);
-		i++;
-	}
-	conn.currentTimestamps = conn.currentTimestamps[i:];
-	conn.currentCount -= deletedRequests;
-	if(conn.currentCount < 0) {
-		fmt.Println("Sending signal")
+	if(len(conn.currentTimestamps) == 0) {
+		fmt.Println("Sending signal to close sliding window for user " + strconv.FormatInt(window, 10));
 		conn.currentCount = 0;
 		conn.signal <- false;
 	}
+	i := 0;
+	deletedRequests := 0;
+	for(timeNow >= conn.currentTimestamps[i] + window) {
+		deletedRequests += conn.requests[conn.currentTimestamps[i]];
+		delete(conn.requests, conn.currentTimestamps[i]);
+		fmt.Println("DELETED")
+		i++;
+	}
+	fmt.Println("Oldcount  is : " + strconv.FormatInt(int64(len(conn.currentTimestamps)), 10))
+	fmt.Println("I is " + strconv.FormatInt(int64(i), 10))
+	conn.currentTimestamps = conn.currentTimestamps[i:];
+	conn.currentCount -= deletedRequests;
+	fmt.Println("%%%%%%%%%%%%%%%%%%%%%% " + strconv.FormatInt(int64(len(conn.currentTimestamps)), 10));
 }
 
 func (conn *Connection) getCurrentCount() int {

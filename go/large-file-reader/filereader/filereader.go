@@ -82,3 +82,4 @@ func (sf *FileReader) ReadRecords (readFrom int64, readSize int64, readfileStrea
 	}
 
 };
+
